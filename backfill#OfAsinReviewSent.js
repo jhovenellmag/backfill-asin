@@ -52,7 +52,7 @@ async function getCompanies(after) {
     try {
       // API request
       const apiPromise = await hubspotClient.crm.companies.basicApi.getPage(limit, after, undefined, undefined, ["emails"], archived);
-      const timeoutPromise = delay(5000).then(() => { throw new Error('API call timed out') });
+      const timeoutPromise = delay(3000).then(() => { throw new Error('API call timed out') });
       const apiResponse = await Promise.race([apiPromise, timeoutPromise]);
       apiUsage++ // increment api usage counter by 1
       console.log("API Usage: " + apiUsage)
@@ -76,7 +76,7 @@ async function getCompanies(after) {
           // loop through each email id to check for asin review emails
           for (const email of emails) {
             const emailId = email.id // get email id from api response for email API requirements
-            await delay(200) // delay for 0.2 seconds
+            await delay(70) // delay for 0.07 seconds
             const checkEmail = await getEmailInfo(emailId, emailSender) // call email api to check if this email object is an asin review email
 
             // if the email is indeed an ASIN review email
@@ -88,7 +88,7 @@ async function getCompanies(after) {
 
           console.log("Number of ASIN Review Sent: " + asinReviewCount)
           const SimplePublicObjectInput = { properties: {"number_of_asin_review_sent": asinReviewCount} }; // initialize asin review count variable for PATCH request
-          await delay(200) // delay for 0.2 seconds
+          await delay(70) // delay for 0.07 seconds
           await updateCompany(companyId, SimplePublicObjectInput) // update "number_of_asin_review_sent" property in hubspot
         }
 
@@ -102,8 +102,8 @@ async function getCompanies(after) {
           console.log("Hit daily API quota")
           return
         }
-        // Delay 1 second
-        await delay(1000);
+        // Delay 0.07 second
+        await delay(70);
         // Repeat the script
         await callGetCompanies();
       } else {
@@ -115,17 +115,17 @@ async function getCompanies(after) {
     } catch (e) {
       if (e.message === 'API call timed out') {
         console.log('API call timed out, retrying...');
-        await delay(1000)
+        await delay(70)
         await getCompanies(after); // repeat the API call
       } else if (e.message === 'HTTP request failed') {
         console.error(JSON.stringify(e.response, null, 2));
-        await delay(1000)
+        await delay(70)
         await getCompanies(after); // repeat the API call
       } else {
       e.message === 'HTTP request failed'
         ? console.error(JSON.stringify(e.response, null, 2))
         : console.error(e)
-        await delay(1000)
+        await delay(70)
         await getCompanies(after); // repeat the API call
     }
   }
@@ -207,24 +207,24 @@ async function getEmailInfo(emailId, lastEmailSender) {
 async function updateCompany (companyId, SimplePublicObjectInput) {
     try {
         const apiPromise = hubspotClient.crm.companies.basicApi.update(companyId, SimplePublicObjectInput);
-        const timeoutPromise = delay(5000).then(() => { throw new Error('API call timed out') });
+        const timeoutPromise = delay(3000).then(() => { throw new Error('API call timed out') });
         const apiResponse = await Promise.race([apiPromise, timeoutPromise]);
         apiUsage++ // increment api usage counter
         console.log(apiResponse.id + " has been updated");
     } catch (e) {
         if (e.message === 'API call timed out') {
           console.log('API call timed out, retrying...');
-          await delay(1000)
+          await delay(70)
           await updateCompany(companyId, SimplePublicObjectInput); // repeat the API call
         } else if (e.message === 'HTTP request failed') {
           console.error(JSON.stringify(e.response, null, 2));
-          await delay(1000)
+          await delay(70)
           await updateCompany(companyId, SimplePublicObjectInput); // repeat the API call
         } else {
         e.message === 'HTTP request failed'
           ? console.error(JSON.stringify(e.response, null, 2))
           : console.error(e)
-          await delay(1000)
+          await delay(70)
           await updateCompany(companyId, SimplePublicObjectInput); // repeat the API call
         }
     }
